@@ -1,0 +1,181 @@
+ <!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="assets/elementUi/element.css" rel="stylesheet">
+    <link href="assets/formUi/formUi.css" rel="stylesheet">
+</head>
+<body>
+<template id="hzFormTemplate">
+	<div id="vueBody" class="hz-form-content" v-if="showVBody" v-loading="loading" element-loading-text="拼命加载中">
+		<div v-for="ui in uiObjs">
+
+			<hz-title :hz-title="ui.title" v-if="ui.type=='title'"></hz-title>
+
+			<hz-select :hz-label="ui.label" :validation="ui.validate" :multi="ui.multi" :ui-name="ui.name" :opts='ui.opts' :val="ui.value" v-if="ui.type=='select'"></hz-select>
+
+			<hz-radio :hz-label="ui.label"  :validation="ui.validate" :ui-style="ui.style" :ui-name="ui.name" :opts='ui.opts' :val="ui.value" v-if="ui.type=='radio'"></hz-radio>
+
+			<hz-checkbox :hz-label="ui.label" :validation="ui.validate" :all-check="ui.allCheck" :ui-name="ui.name" :opts='ui.opts' :checkeds="ui.checked" :val="ui.value" v-if="ui.type=='checkBox'"></hz-checkbox>
+
+			<hz-input :hz-label="ui.label"   :val="ui.value" :ui-name="ui.name" :validation="ui.validate" :type="ui.type" :place="ui.place" :val="ui.value" v-if="ui.type=='input'"></hz-input>
+
+			<hz-cascader :hz-label="ui.label" :multi="ui.multi" :validation="ui.validate" :ui-name="ui.name" :opts='ui.opts' :val="ui.value" v-if="ui.type=='cascader'"></hz-cascader>
+
+			<hz-footer  :ui-name="ui.name" :text="ui.text" v-on:submit="submit" v-on:cancel="cancel" v-if="ui.type=='footer'"></hz-footer>
+
+			<hz-daterange :hz-label="ui.label" :validation="ui.validate" :type="ui.type" :ui-name="ui.name" :format="ui.format" :val="ui.value" v-if="ui.type=='daterange'||ui.type=='datetimerange'||ui.type=='datetime'"></hz-daterange> 
+
+			<hz-switch :hz-label="ui.label" :validation="ui.validate" :ui-name="ui.name" :val="ui.value" :text="ui.text" v-if="ui.type=='switch'"></hz-switch> 
+
+			<hz-transfer :hz-label="ui.label" :validation="ui.validate" :ui-name="ui.name" :data="ui.data" :titles="ui.titles" :val="ui.value" v-if="ui.type=='transfer'"></hz-transfer> 
+
+			<!-- 自定义组件 -->
+			<hz-slot :hz-slot-name="ui.slotName" :ui-name="ui.name" :slot-vals="ui.slotVals" v-if="ui.type=='slot'"></hz-slot>
+		</div>
+	</div>
+</template>
+
+
+<!-- 标题 -->
+<template id="hzTitleTemplate">
+	<div class="hz-form-title">{{name}}</div>
+</template>
+
+<!-- 选择框 -->
+<template id="hzSelectTemplate">
+	<div v-if="!multiple" class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right">
+			<el-select v-model="value" :name="name" clearable placeholder="请选择">
+			    <el-option
+			      v-for="item in options"
+			      :key="item.value"
+			      :label="item.label"
+			      :value="item.value">
+			    </el-option>
+			</el-select>
+		</span>
+	</div>
+	<div v-else class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right">
+			<el-select v-model="value" :name="name" clearable multiple placeholder="请选择">
+			    <el-option
+			      v-for="item in options"
+			      :key="item.value"
+			      :label="item.label"
+			      :value="item.value">
+			    </el-option>
+			</el-select>
+		</span>
+	</div>
+</template>
+
+
+<!-- radio -->
+<template id="hzRadioTemplate">
+	<div class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right">
+			<el-radio class="radio" v-model="value" :label="radio.value" v-for="radio in options" :key="radio.value" :name="name" >{{radio.label}}</el-radio>
+		</span>
+	</div>
+</template>
+
+<!-- checkbox  -->
+<template id="hzCheckboxTemplate">
+	<div class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right">
+			<el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+			<el-checkbox-group v-model="valChecked" @change="handleCheckedChange">
+				<el-checkbox v-for="opt in options" :label="opt.value" :key="opt.value">{{opt.text}}</el-checkbox>
+			</el-checkbox-group>
+		</span>
+	</div>
+</template>
+
+<!-- input  -->
+<template id="hzInputTemplate">
+	<div class="el-form-item" :class="[isRequired,isError]" >
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right" >
+			<el-input v-model="value"  @change="doValidate" :placeholder="placeholder"></el-input>
+		</span>
+	</div>
+</template>
+
+<!-- cascader  -->
+<template id="hzCascaderTemplate">
+	<div class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right" >
+			<el-cascader v-model="value"  :options="options" :show-all-levels="false"></el-cascader>
+		</span>
+	</div>
+</template>
+
+<!-- footer  -->
+<template id="hzFooterTemplate">
+	<div class="hz-form-footer"  >
+		<el-button type="primary" @click="onSubmit">{{text}}</el-button>
+    	<el-button @click="onCancel">取消</el-button>
+	</div>
+</template>
+
+<!-- daterange  -->
+<template id="hzDaterangeTemplate">
+	<div class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right" >
+			<el-date-picker v-model="value" @change="doValidate" :type="rangeType" :picker-options="pickerOptions" :placeholder="placeholder" :format="formatDate" ></el-date-picker>
+		</span>
+	</div>
+</template>
+
+<!-- swtich  -->
+<template id="hzSwitchTemplate">
+	<div class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right" >
+			<el-switch v-model="value" :on-text="onText" :off-text="offText" ></el-switch>
+		</span>
+	</div>
+</template>
+
+<!-- transfer  -->
+<template id="hzTransferTemplate">
+	<div class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right" >
+			<el-transfer filterable  v-model="value" :right-default-checked="value" :data="transferdata" :titles="transferTitles"></el-transfer>
+		</span>
+	</div>
+</template>
+
+<!-- upload  -->
+<template id="hzUploadTemplate">
+	<div class="el-form-item" :class="[isRequired,isError]">
+		<span v-text="label" class="hz-form-left"></span>
+		<span class="hz-form-right" >
+			<el-upload action="" list-type="picture-card" :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
+  			<i class="el-icon-plus"></i>
+			</el-upload>
+			<el-dialog v-model="dialogVisible" size="tiny">
+			   <img width="100%" :src="dialogImageUrl" alt="">
+			</el-dialog>
+		</span>
+	</div>
+</template>
+
+<!-- 自定义组件 -->
+<template id="hzSlotTemplate">
+	<div></div>
+</template>
+</body>
+<script src="assets/js/vue.js"></script>
+<script src="assets/elementUi/element.js"></script>
+<script src="assets/formUi/formUi.js"></script>
+</html>

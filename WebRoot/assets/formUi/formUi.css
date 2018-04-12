@@ -1,0 +1,63 @@
+.hz-form-left{
+	text-align: right;
+    vertical-align: middle;
+    float: left;
+    font-size: 14px;
+    color: #48576a;
+    line-height: 1;
+    padding: 11px 12px 11px 0;
+    box-sizing: border-box;
+    width: 100px;
+}
+.hz-form-right{
+	line-height: 36px;
+    position: relative;
+    font-size: 14px;
+    margin-left: 100px;
+    display: block;
+    padding-right: 20px;
+}
+.radio,.checkbox{
+    margin-top:0px !important;
+    margin-bottom:0px !important;
+}
+.hz-form-title{
+    height: 40px;
+    line-height: 40px;
+    background: #656565;
+    border-radius: 5px 5px 0px 0px;
+    padding: 0px 15px;
+    color: #fff;
+}
+.hz-form-footer{
+    position: relative;
+    text-align: right;
+    padding-right: 20px;
+}
+.hz-form-content{
+    border: 1px solid #eaeefb;
+    border-radius: 4px;
+    transition: .2s;
+    margin: 0 auto;
+    width: 900px;
+    position: relative;
+}
+
+.hz-form-content>div{
+    margin-bottom: 10px;
+}
+.is-required .hz-form-left:before {
+    content: "*";
+    color: #fa5555;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.hz-error-content{
+    position: absolute;
+    height: 20px;
+    line-height: 20px;
+    padding: 0px 10px;
+    color: #e80000;
+    margin-top: 1px;
+    display: none;
+}
